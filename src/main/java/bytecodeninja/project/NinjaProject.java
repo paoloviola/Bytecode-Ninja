@@ -18,6 +18,7 @@ import java.util.Objects;
 public class NinjaProject
 {
 
+    protected static final String MODULES_DIRECTORY = ".ninja/modules/";
     protected static final String WORKSPACE_FILE = ".ninja/workspace.xml";
 
     private String name;
@@ -92,7 +93,7 @@ public class NinjaProject
         project.location = projectDir.getAbsolutePath();
         project.name = nameNode.getTextContent();
         { // Load modules
-            File modulesDir = new File(project.getLocation(), NinjaModule.MODULES_DIRECTORY);
+            File modulesDir = new File(project.getLocation(), MODULES_DIRECTORY);
 
             File[] moduleFiles = modulesDir.listFiles();
             if(moduleFiles == null)
