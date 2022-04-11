@@ -98,13 +98,10 @@ public class NinjaModule
 
         Node nameNode = XMLUtil.getFirstByTag(root, "name");
         Node locationNode = XMLUtil.getFirstByTag(root, "location");
-        Node srcNode = XMLUtil.getFirstByTag(root, "srcDir");
-        Node resNode = XMLUtil.getFirstByTag(root, "resDir");
         Node configsNode = XMLUtil.getFirstByTag(root, "configs");
         Node libsNode = XMLUtil.getFirstByTag(root, "libraries");
 
         if(nameNode == null || locationNode == null
-                || srcNode == null || resNode == null
                 || !(configsNode instanceof Element)
                 || !(libsNode instanceof Element)) {
             throw new IOException("Corrupted module file!");
