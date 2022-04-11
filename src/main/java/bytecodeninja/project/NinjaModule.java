@@ -19,27 +19,27 @@ import java.util.Objects;
 public class NinjaModule
 {
 
-    protected static final String MODULES_DIRECTORY = ".ninja/modules/";
+    protected static final String SOURCE_DIRECTORY = "src";
+    protected static final String RESOURCE_DIRECTORY = "res";
 
     private NinjaProject project;
 
     private String name;
     private String location;
-    private String srcDir;
-    private String resDir;
 
+    private final List<RunConfig> runConfigs;
     private final List<ProjectLibrary> libraries;
     public NinjaModule(NinjaProject project, String name, String location) {
         this.project = Objects.requireNonNull(project);
         this.name = Objects.requireNonNull(name);
         this.location = Objects.requireNonNull(location);
-        this.srcDir = "src";
-        this.resDir = "res";
 
+        this.runConfigs = new ArrayList<>();
         this.libraries = new ArrayList<>();
     }
 
     private NinjaModule() {
+        this.runConfigs = new ArrayList<>();
         this.libraries = new ArrayList<>();
     }
 
@@ -50,14 +50,13 @@ public class NinjaModule
         NinjaModule module = (NinjaModule) o;
         return name.equals(module.name)
                 && location.equals(module.location)
-                && srcDir.equals(module.srcDir)
-                && resDir.equals(module.resDir)
+                && runConfigs.equals(module.runConfigs)
                 && libraries.equals(module.libraries);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, location, srcDir, resDir, libraries);
+        return Objects.hash(name, location, runConfigs, libraries);
     }
 
     public boolean save() {
@@ -67,14 +66,16 @@ public class NinjaModule
             {
                 root.appendChild(XMLUtil.createTextNode(doc, "name", name));
                 root.appendChild(XMLUtil.createTextNode(doc, "location", location));
-                root.appendChild(XMLUtil.createTextNode(doc, "srcDir", srcDir));
-                root.appendChild(XMLUtil.createTextNode(doc, "resDir", resDir));
+
+                Element configsElement = doc.createElement("configs");
+                runConfigs.forEach(config -> config.save(configsElement));
+                root.appendChild(configsElement);
 
                 Element libsElement = doc.createElement("libraries");
                 libraries.forEach(lib -> lib.save(libsElement));
                 root.appendChild(libsElement);
             }
-            XMLUtil.write(doc, new File(project.getLocation(), MODULES_DIRECTORY + name + ".xml"));
+            XMLUtil.write(doc, new File(project.getLocation(), NinjaProject.MODULES_DIRECTORY + name + ".xml"));
             return true;
         }
         catch (Exception e) {
@@ -97,12 +98,11 @@ public class NinjaModule
 
         Node nameNode = XMLUtil.getFirstByTag(root, "name");
         Node locationNode = XMLUtil.getFirstByTag(root, "location");
-        Node srcNode = XMLUtil.getFirstByTag(root, "srcDir");
-        Node resNode = XMLUtil.getFirstByTag(root, "resDir");
+        Node configsNode = XMLUtil.getFirstByTag(root, "configs");
         Node libsNode = XMLUtil.getFirstByTag(root, "libraries");
 
         if(nameNode == null || locationNode == null
-                || srcNode == null || resNode == null
+                || !(configsNode instanceof Element)
                 || !(libsNode instanceof Element)) {
             throw new IOException("Corrupted module file!");
         }
@@ -112,8 +112,19 @@ public class NinjaModule
 
         module.name = nameNode.getTextContent();
         module.location = locationNode.getTextContent();
-        module.srcDir = srcNode.getTextContent();
-        module.resDir = resNode.getTextContent();
+        { // Load run configurations
+            NodeList configNodes = ((Element)configsNode).getElementsByTagName("config");
+            for (int i = 0; i < configNodes.getLength(); i++) {
+                try {
+                    module.runConfigs.add(
+                            RunConfig.load(module, configNodes.item(i))
+                    );
+                }
+                catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
         { // Load libraries
             NodeList libNodes = ((Element)libsNode).getElementsByTagName("library");
             for (int i = 0; i < libNodes.getLength(); i++) {

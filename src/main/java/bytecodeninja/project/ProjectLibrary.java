@@ -2,6 +2,7 @@ package bytecodeninja.project;
 
 import bytecodeninja.util.XMLUtil;
 import lombok.Getter;
+import lombok.Setter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -12,12 +13,11 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-@Getter
 public class ProjectLibrary
 {
 
-    private final String name;
-    private final Set<String> paths;
+    @Setter private String name;
+    @Getter private final Set<String> paths;
 
     public ProjectLibrary(String name) {
         this(name, new HashSet<>());
