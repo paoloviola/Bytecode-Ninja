@@ -21,8 +21,10 @@ dependencies {
     // https://mvnrepository.com/artifact/org.ow2.asm/asm-analysis
     implementation 'org.ow2.asm:asm-analysis:9.2'
 
-    // https://mvnrepository.com/artifact/com.formdev/flatlaf
-    implementation 'com.formdev:flatlaf:2.0.2'
+    // https://search.maven.org/artifact/com.formdev/flatlaf/2.1/jar
+    implementation 'com.formdev:flatlaf:2.1'
+    // https://search.maven.org/artifact/com.formdev/flatlaf-extras/2.1/jar
+    implementation 'com.formdev:flatlaf-extras:2.1'
 
     // https://projectlombok.org/setup/gradle
     compileOnly 'org.projectlombok:lombok:1.18.22'
@@ -30,7 +32,7 @@ dependencies {
     testCompileOnly 'org.projectlombok:lombok:1.18.22'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
 

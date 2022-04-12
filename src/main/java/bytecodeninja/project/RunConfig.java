@@ -15,7 +15,6 @@ public class RunConfig
 {
 
     private String name;
-    private NinjaModule module;
 
     private String sdkDirectory;
     private String workDirectory;
@@ -24,9 +23,13 @@ public class RunConfig
     private String programArguments;
     private String mainClass;
 
-    public RunConfig(String name, NinjaModule module) {
+    public RunConfig(String name) {
         this.name = Objects.requireNonNull(name);
-        this.module = Objects.requireNonNull(module);
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 
     @Override
@@ -35,7 +38,6 @@ public class RunConfig
         if (o == null || getClass() != o.getClass()) return false;
         RunConfig runConfig = (RunConfig) o;
         return Objects.equals(name, runConfig.name)
-                && Objects.equals(module, runConfig.module)
                 && Objects.equals(sdkDirectory, runConfig.sdkDirectory)
                 && Objects.equals(workDirectory, runConfig.workDirectory)
                 && Objects.equals(vmArguments, runConfig.vmArguments)
@@ -46,12 +48,11 @@ public class RunConfig
     @Override
     public int hashCode() {
         return Objects.hash(
-                name, module,
+                name,
                 sdkDirectory, workDirectory,
                 vmArguments, programArguments, mainClass
         );
     }
-
 
     void save(Element root) {
         Document doc = root.getOwnerDocument();
@@ -65,7 +66,7 @@ public class RunConfig
         root.appendChild(configElement);
     }
 
-    static RunConfig load(NinjaModule module, Node configNode) throws IOException {
+    static RunConfig load(Node configNode) throws IOException {
         if(!(configNode instanceof Element))
             throw new IOException("Corrupted config element!");
 
@@ -82,7 +83,7 @@ public class RunConfig
             throw new IOException("Corrupted config element!");
         }
 
-        RunConfig runConfig = new RunConfig(nameNode.getTextContent(), module);
+        RunConfig runConfig = new RunConfig(nameNode.getTextContent());
         runConfig.setSdkDirectory(sdkDirNode.getTextContent());
         runConfig.setWorkDirectory(workDirNode.getTextContent());
         runConfig.setVmArguments(vmArgsNode.getTextContent());

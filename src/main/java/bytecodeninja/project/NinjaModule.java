@@ -44,6 +44,11 @@ public class NinjaModule
     }
 
     @Override
+    public String toString() {
+        return name;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -117,7 +122,7 @@ public class NinjaModule
             for (int i = 0; i < configNodes.getLength(); i++) {
                 try {
                     module.runConfigs.add(
-                            RunConfig.load(module, configNodes.item(i))
+                            RunConfig.load(configNodes.item(i))
                     );
                 }
                 catch (IOException e) {

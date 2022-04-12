@@ -3,6 +3,7 @@ package bytecodeninja.test.project;
 import bytecodeninja.project.ProjectLibrary;
 import bytecodeninja.project.NinjaModule;
 import bytecodeninja.project.NinjaProject;
+import bytecodeninja.project.RunConfig;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +18,9 @@ public class ProjectSerializationTesting
             NinjaProject project = new NinjaProject("Test Project", "C:/Ninja Project");
             NinjaModule module = new NinjaModule(project, "Test Module", "C:/Ninja Project/Test Module");
             module.getLibraries().add(new ProjectLibrary("Test Library", new HashSet<>(Arrays.asList("brr", "skrr"))));
+            module.getRunConfigs().add(new RunConfig("Test Config0"));
+            module.getRunConfigs().add(new RunConfig("Test Config1"));
+            module.getRunConfigs().add(new RunConfig("Test Config2"));
             project.getModules().add(module);
 
             System.out.println(project.save() ? "Saving successful!" : "Saving failed!");
