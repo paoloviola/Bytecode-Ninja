@@ -1,9 +1,6 @@
 package bytecodeninja.test.project;
 
-import bytecodeninja.project.ProjectLibrary;
-import bytecodeninja.project.NinjaModule;
-import bytecodeninja.project.NinjaProject;
-import bytecodeninja.project.RunConfig;
+import bytecodeninja.project.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +27,7 @@ public class ProjectSerializationTesting
             NinjaProject.load(new File("C:/Ninja Project"));
             System.out.println("Loading successful!");
         }
-        catch (IOException e) {
+        catch (ProjectException | IOException e) {
             System.out.println("Loading failed!");
             e.printStackTrace();
         }

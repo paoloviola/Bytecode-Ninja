@@ -30,6 +30,8 @@ public class NinjaDisplay extends JFrame
         setLocationRelativeTo(null);
         setMinimumSize(getSize());
 
+        // TODO: ADD WINDOW CLOSING LISTENER
+
         menubar = new NinjaMenubar(this);
         setJMenuBar(menubar);
 

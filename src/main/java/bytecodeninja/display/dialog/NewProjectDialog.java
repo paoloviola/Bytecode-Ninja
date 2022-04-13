@@ -52,6 +52,7 @@ public class NewProjectDialog extends JDialog
 
     private void selectLocation(ActionEvent e) {
         JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Select Project Path...");
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         fileChooser.setMultiSelectionEnabled(false);
 
@@ -75,7 +76,7 @@ public class NewProjectDialog extends JDialog
             setVisible(false);
         else {
             JOptionPane.showMessageDialog(this,
-                    "Could not create Project!\nRead the console for more information.", "Error",
+                    "Could not create project!\nRead the console for more information.", "Error",
                     JOptionPane.ERROR_MESSAGE
             );
             project = null;
@@ -98,7 +99,7 @@ public class NewProjectDialog extends JDialog
 
             JOptionPane.showMessageDialog(this,
                     "Please select an empty directory!", "Error",
-                    JOptionPane.ERROR_MESSAGE
+                    JOptionPane.INFORMATION_MESSAGE
             );
             return true;
         }

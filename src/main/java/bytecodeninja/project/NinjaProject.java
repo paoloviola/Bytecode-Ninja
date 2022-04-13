@@ -79,13 +79,16 @@ public class NinjaProject
         }
     }
 
-    public static NinjaProject load(File projectDir) throws IOException {
+    public static NinjaProject load(File projectDir) throws ProjectException, IOException {
         if(!projectDir.exists() || !projectDir.isDirectory())
-            throw new IOException("Not a project directory!");
+            throw new ProjectException();
 
         Element root;
         try {
-            root = XMLUtil.read(new File(projectDir, WORKSPACE_FILE));
+            File workspaceFile = new File(projectDir, WORKSPACE_FILE);
+            if(!workspaceFile.exists() || !workspaceFile.isFile())
+                throw new ProjectException();
+            root = XMLUtil.read(workspaceFile);
         }
         catch (ParserConfigurationException | SAXException e) {
             throw new IOException(e);

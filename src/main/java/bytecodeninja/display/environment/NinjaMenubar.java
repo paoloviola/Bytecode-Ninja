@@ -1,6 +1,7 @@
 package bytecodeninja.display.environment;
 
 import bytecodeninja.display.dialog.NewProjectDialog;
+import bytecodeninja.project.ProjectException;
 import bytecodeninja.project.NinjaProject;
 import bytecodeninja.project.RunConfig;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
@@ -10,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.io.IOException;
 
 public class NinjaMenubar extends JMenuBar
 {
@@ -41,6 +43,7 @@ public class NinjaMenubar extends JMenuBar
             newMenu.add(newModuleItem = createMenuItem("Module...", this::createNewModule));
             fileMenu.add(newMenu);
         }
+        fileMenu.add(createMenuItem("Open Project...", this::openProject)); // Should always be accessible
         fileMenu.add(closeProjectItem = createMenuItem("Close Project", this::closeProject));
         fileMenu.addSeparator();
         fileMenu.add(projectStructureItem = createMenuItem("Project Structure...",
@@ -102,21 +105,41 @@ public class NinjaMenubar extends JMenuBar
         NewProjectDialog dialog = new NewProjectDialog(parent);
         dialog.setVisible(true);
 
-        if(dialog.getProject() == null) return;
-        if(parent.getCurrentProject() != null) {
-            int confirm = JOptionPane.showConfirmDialog(
-                    parent, "You are about to create a new project which will discard all unsaved changes.\nDo you want to continue?", "Confirm",
-                    JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE
-            ); // Ask user for confirmation of closing the current project
-            if(confirm != JOptionPane.YES_OPTION)
-                return;
-        }
-
-        parent.selectProject(dialog.getProject());
+        if(dialog.getProject() != null)
+            parent.selectProject(dialog.getProject());
     }
 
     public void createNewModule(ActionEvent e) {
         // TODO: CREATE NEW MODULE
+    }
+
+    public void openProject(ActionEvent e) {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Select Project Path...");
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        fileChooser.setMultiSelectionEnabled(false);
+
+        if(fileChooser.showOpenDialog(parent) != JFileChooser.APPROVE_OPTION)
+            return;
+
+        try {
+            parent.selectProject(NinjaProject.load(
+                    fileChooser.getSelectedFile()
+            ));
+        }
+        catch (ProjectException ex) {
+            JOptionPane.showMessageDialog(parent,
+                    "You have selected an invalid project!", "Error",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+        }
+        catch (IOException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(parent,
+                    "Could not open project!\nRead the console for more information.", "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
     }
 
     public void closeProject(ActionEvent e) {
@@ -124,8 +147,8 @@ public class NinjaMenubar extends JMenuBar
             throw new RuntimeException("This is not supposed to happen!");
 
         int confirm = JOptionPane.showConfirmDialog(
-                parent, "You are about to close this project which will discard all unsaved changes.\nDo you want to continue?", "Confirm",
-                JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE
+                parent, "Do you really want to close this project?", "Confirm",
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE
         );
         if(confirm == JOptionPane.YES_OPTION)
             parent.selectProject(null);
