@@ -1,14 +1,11 @@
-package bytecodeninja.display;
+package bytecodeninja.display.environment;
 
 import bytecodeninja.project.NinjaProject;
 import com.formdev.flatlaf.FlatDarculaLaf;
-import com.formdev.flatlaf.FlatDarkLaf;
 import lombok.Getter;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
-import java.io.IOException;
 
 @Getter
 public class NinjaDisplay extends JFrame
@@ -17,6 +14,8 @@ public class NinjaDisplay extends JFrame
     static {
         updateLookAndFeel();
     }
+
+    private NinjaProject currentProject;
 
     private final NinjaMenubar menubar;
 
@@ -44,6 +43,7 @@ public class NinjaDisplay extends JFrame
     }
 
     public void selectProject(NinjaProject project) {
+        currentProject = project;
         menubar.selectProject(project);
         toolbar.selectProject(project);
         explorer.selectProject(project);

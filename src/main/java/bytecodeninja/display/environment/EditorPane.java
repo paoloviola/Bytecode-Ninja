@@ -1,4 +1,4 @@
-package bytecodeninja.display;
+package bytecodeninja.display.environment;
 
 import bytecodeninja.project.NinjaProject;
 

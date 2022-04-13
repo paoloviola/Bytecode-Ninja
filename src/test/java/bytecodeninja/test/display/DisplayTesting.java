@@ -1,6 +1,6 @@
 package bytecodeninja.test.display;
 
-import bytecodeninja.display.NinjaDisplay;
+import bytecodeninja.display.environment.NinjaDisplay;
 
 public class DisplayTesting
 {
