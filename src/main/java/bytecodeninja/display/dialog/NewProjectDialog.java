@@ -98,7 +98,7 @@ public class NewProjectDialog extends JDialog
             );
 
             JOptionPane.showMessageDialog(this,
-                    "Please select an empty directory!", "Error",
+                    "Please select an empty directory!", "Could not load Project",
                     JOptionPane.INFORMATION_MESSAGE
             );
             return true;

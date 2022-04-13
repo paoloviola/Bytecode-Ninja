@@ -129,7 +129,7 @@ public class NinjaMenubar extends JMenuBar
         }
         catch (ProjectException ex) {
             JOptionPane.showMessageDialog(parent,
-                    "You have selected an invalid project!", "Error",
+                    "You have selected an invalid project!", "Could not load Project",
                     JOptionPane.INFORMATION_MESSAGE
             );
         }
@@ -146,8 +146,8 @@ public class NinjaMenubar extends JMenuBar
         if(parent.getCurrentProject() == null)
             throw new RuntimeException("This is not supposed to happen!");
 
-        int confirm = JOptionPane.showConfirmDialog(
-                parent, "Do you really want to close this project?", "Confirm",
+        int confirm = JOptionPane.showConfirmDialog(parent,
+                "Do you really want to close this project?", "Confirm Close",
                 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE
         );
         if(confirm == JOptionPane.YES_OPTION)
@@ -159,7 +159,12 @@ public class NinjaMenubar extends JMenuBar
     }
 
     public void exit(ActionEvent e) {
-        // TODO: EXIT
+        int confirm = JOptionPane.showConfirmDialog(parent,
+                "Are you sure you want to exit?", "Confirm Exit",
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+        if(confirm == JOptionPane.YES_OPTION)
+            parent.setVisible(false);
     }
     // FILE MENU
 

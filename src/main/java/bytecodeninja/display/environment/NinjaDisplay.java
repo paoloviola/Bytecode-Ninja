@@ -6,6 +6,9 @@ import lombok.Getter;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 @Getter
 public class NinjaDisplay extends JFrame
@@ -30,10 +33,17 @@ public class NinjaDisplay extends JFrame
         setLocationRelativeTo(null);
         setMinimumSize(getSize());
 
-        // TODO: ADD WINDOW CLOSING LISTENER
-
         menubar = new NinjaMenubar(this);
         setJMenuBar(menubar);
+
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                super.windowClosing(e);
+                menubar.exit(null);
+            }
+        });
 
         toolbar = new ToolbarPane(menubar);
         explorer = new ExplorerPane(menubar);
