@@ -35,6 +35,37 @@ public class NinjaProject
         this.modules = new ArrayList<>();
     }
 
+    public boolean addModule(NinjaModule module) {
+        if(findModule(module.getName()) != null)
+            return false;
+
+        if(module.save()) {
+            modules.add(module);
+            save(); // Save project silently, since we want to ignore the already known errors
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean removeModule(NinjaModule module) {
+        if(findModule(module.getName()) == null)
+            return false;
+
+        modules.remove(module);
+        save(); // Save project silently, since we want to ignore the already known errors
+        return true;
+    }
+
+    public NinjaModule findModule(String name) {
+        for (NinjaModule module : modules) {
+            if(module.getName().equals(name))
+                return module;
+        }
+
+        return null;
+    }
+
     @Override
     public String toString() {
         return name;

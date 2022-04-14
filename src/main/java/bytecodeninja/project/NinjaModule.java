@@ -11,9 +11,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Getter
 public class NinjaModule
@@ -25,22 +23,20 @@ public class NinjaModule
     private NinjaProject project;
 
     private String name;
-    private String location;
 
+    private final Set<String> libraries;
     private final List<RunConfig> runConfigs;
-    private final List<ProjectLibrary> libraries;
-    public NinjaModule(NinjaProject project, String name, String location) {
+    public NinjaModule(NinjaProject project, String name) {
         this.project = Objects.requireNonNull(project);
         this.name = Objects.requireNonNull(name);
-        this.location = Objects.requireNonNull(location);
 
+        this.libraries = new HashSet<>();
         this.runConfigs = new ArrayList<>();
-        this.libraries = new ArrayList<>();
     }
 
     private NinjaModule() {
+        this.libraries = new HashSet<>();
         this.runConfigs = new ArrayList<>();
-        this.libraries = new ArrayList<>();
     }
 
     @Override
@@ -54,14 +50,13 @@ public class NinjaModule
         if (o == null || getClass() != o.getClass()) return false;
         NinjaModule module = (NinjaModule) o;
         return name.equals(module.name)
-                && location.equals(module.location)
                 && runConfigs.equals(module.runConfigs)
                 && libraries.equals(module.libraries);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, location, runConfigs, libraries);
+        return Objects.hash(name, runConfigs, libraries);
     }
 
     public boolean save() {
@@ -70,14 +65,13 @@ public class NinjaModule
             Document doc = root.getOwnerDocument();
             {
                 root.appendChild(XMLUtil.createTextNode(doc, "name", name));
-                root.appendChild(XMLUtil.createTextNode(doc, "location", location));
 
                 Element configsElement = doc.createElement("configs");
                 runConfigs.forEach(config -> config.save(configsElement));
                 root.appendChild(configsElement);
 
                 Element libsElement = doc.createElement("libraries");
-                libraries.forEach(lib -> lib.save(libsElement));
+                libraries.forEach(lib -> libsElement.appendChild(XMLUtil.createTextNode(doc, "library", lib)));
                 root.appendChild(libsElement);
             }
             XMLUtil.write(doc, new File(project.getLocation(), NinjaProject.MODULES_DIRECTORY + name + ".xml"));
@@ -102,11 +96,10 @@ public class NinjaModule
         }
 
         Node nameNode = XMLUtil.getFirstByTag(root, "name");
-        Node locationNode = XMLUtil.getFirstByTag(root, "location");
         Node configsNode = XMLUtil.getFirstByTag(root, "configs");
         Node libsNode = XMLUtil.getFirstByTag(root, "libraries");
 
-        if(nameNode == null || locationNode == null
+        if(nameNode == null
                 || !(configsNode instanceof Element)
                 || !(libsNode instanceof Element)) {
             throw new IOException("Corrupted module file!");
@@ -116,7 +109,6 @@ public class NinjaModule
         module.project = project;
 
         module.name = nameNode.getTextContent();
-        module.location = locationNode.getTextContent();
         { // Load run configurations
             NodeList configNodes = ((Element)configsNode).getElementsByTagName("config");
             for (int i = 0; i < configNodes.getLength(); i++) {
@@ -133,14 +125,9 @@ public class NinjaModule
         { // Load libraries
             NodeList libNodes = ((Element)libsNode).getElementsByTagName("library");
             for (int i = 0; i < libNodes.getLength(); i++) {
-                try {
-                    module.libraries.add(
-                            ProjectLibrary.load(libNodes.item(i))
-                    );
-                }
-                catch (IOException e) {
-                    e.printStackTrace();
-                }
+                module.libraries.add(
+                        libNodes.item(i).getTextContent()
+                );
             }
         }
         return module;

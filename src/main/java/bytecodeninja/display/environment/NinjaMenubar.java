@@ -1,8 +1,9 @@
 package bytecodeninja.display.environment;
 
+import bytecodeninja.display.dialog.NewModuleDialog;
 import bytecodeninja.display.dialog.NewProjectDialog;
-import bytecodeninja.project.ProjectException;
 import bytecodeninja.project.NinjaProject;
+import bytecodeninja.project.ProjectException;
 import bytecodeninja.project.RunConfig;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 
@@ -105,12 +106,32 @@ public class NinjaMenubar extends JMenuBar
         NewProjectDialog dialog = new NewProjectDialog(parent);
         dialog.setVisible(true);
 
-        if(dialog.getProject() != null)
+        if(dialog.getProject() == null) return;
+        if(dialog.getProject().save())
             parent.selectProject(dialog.getProject());
+        else {
+            JOptionPane.showMessageDialog(this,
+                    "Could not create Project!\nRead the console for further information.", "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
     }
 
     public void createNewModule(ActionEvent e) {
-        // TODO: CREATE NEW MODULE
+        NinjaProject project = parent.getCurrentProject();
+        if(project == null)
+            throw new RuntimeException("This is not supposed to happen!");
+
+        NewModuleDialog dialog = new NewModuleDialog(parent, project);
+        dialog.setVisible(true);
+
+        if(dialog.getModule() == null) return;
+        if(!project.addModule(dialog.getModule())) {
+            JOptionPane.showMessageDialog(this,
+                    "Could not create Module!\nRead the console for further information.", "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
     }
 
     public void openProject(ActionEvent e) {
@@ -136,7 +157,7 @@ public class NinjaMenubar extends JMenuBar
         catch (IOException ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(parent,
-                    "Could not open project!\nRead the console for more information.", "Error",
+                    "Could not open project!\nRead the console for further information.", "Error",
                     JOptionPane.ERROR_MESSAGE
             );
         }
@@ -186,14 +207,6 @@ public class NinjaMenubar extends JMenuBar
 
     private static JMenuItem createMenuItem(String name, ActionListener action) {
         return createMenuItem(name, null, null, action);
-    }
-
-    private static JMenuItem createMenuItem(String name, KeyStroke keyStroke, ActionListener action) {
-        return createMenuItem(name, null, keyStroke, action);
-    }
-
-    private static JMenuItem createMenuItem(String name, Icon icon, ActionListener action) {
-        return createMenuItem(name, icon, null, action);
     }
 
     private static JMenuItem createMenuItem(String name, Icon icon, KeyStroke keyStroke, ActionListener action) {

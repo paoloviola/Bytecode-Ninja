@@ -13,7 +13,6 @@ public class NewProjectDialog extends JDialog
 {
 
     private JPanel contentPane;
-
     private JButton createButton;
     private JButton cancelButton;
 
@@ -71,16 +70,7 @@ public class NewProjectDialog extends JDialog
                 nameField.getText().trim(),
                 locationField.getText().trim()
         );
-
-        if(project.save())
-            setVisible(false);
-        else {
-            JOptionPane.showMessageDialog(this,
-                    "Could not create project!\nRead the console for more information.", "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
-            project = null;
-        }
+        setVisible(false);
     }
 
     private void cancelProject(ActionEvent e) {
