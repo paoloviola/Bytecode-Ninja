@@ -13,6 +13,6 @@ public class ExplorerPane extends JPanel
         add(new JLabel("Explorer", JLabel.CENTER), BorderLayout.CENTER);
     }
 
-    public void selectProject(NinjaProject project) { }
+    void selectProject(NinjaProject project) { }
 
 }

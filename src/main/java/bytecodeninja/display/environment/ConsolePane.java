@@ -13,6 +13,6 @@ public class ConsolePane extends JPanel
         add(new JLabel("Console", JLabel.CENTER), BorderLayout.CENTER);
     }
 
-    public void selectProject(NinjaProject project) { }
+    void selectProject(NinjaProject project) { }
 
 }

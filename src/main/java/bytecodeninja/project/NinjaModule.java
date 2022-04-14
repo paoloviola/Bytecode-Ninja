@@ -59,21 +59,26 @@ public class NinjaModule
         return Objects.hash(name, runConfigs, libraries);
     }
 
-    public boolean save() {
+    /**
+     * Saves this module to the predefined Path "${PROJECT_LOCATION}/.ninja/modules/${MODULE_NAME}.xml"
+     * @return if the module has been saved successfully or not
+     */
+    boolean save() {
+        Element root = XMLUtil.createDefault("module");
+        Document doc = root.getOwnerDocument();
+        {
+            root.appendChild(XMLUtil.createTextNode(doc, "name", name));
+
+            Element configsElement = doc.createElement("configs");
+            runConfigs.forEach(config -> config.save(configsElement));
+            root.appendChild(configsElement);
+
+            Element libsElement = doc.createElement("libraries");
+            libraries.forEach(lib -> libsElement.appendChild(XMLUtil.createTextNode(doc, "library", lib)));
+            root.appendChild(libsElement);
+        }
+
         try {
-            Element root = XMLUtil.createDefault("module");
-            Document doc = root.getOwnerDocument();
-            {
-                root.appendChild(XMLUtil.createTextNode(doc, "name", name));
-
-                Element configsElement = doc.createElement("configs");
-                runConfigs.forEach(config -> config.save(configsElement));
-                root.appendChild(configsElement);
-
-                Element libsElement = doc.createElement("libraries");
-                libraries.forEach(lib -> libsElement.appendChild(XMLUtil.createTextNode(doc, "library", lib)));
-                root.appendChild(libsElement);
-            }
             XMLUtil.write(doc, new File(project.getLocation(), NinjaProject.MODULES_DIRECTORY + name + ".xml"));
             return true;
         }
@@ -83,7 +88,14 @@ public class NinjaModule
         }
     }
 
-    public static NinjaModule load(NinjaProject project, File moduleFile) throws IOException {
+    /**
+     * Loads the module file and stores it into a NinjaModule struct
+     * @param project the project this module belongs to (used for saving purposes)
+     * @param moduleFile the file to load from
+     * @return the created NinjaModule object
+     * @throws IOException if any IO errors occur
+     */
+    static NinjaModule load(NinjaProject project, File moduleFile) throws IOException {
         if(!moduleFile.exists() || !moduleFile.isFile())
             throw new IOException("Not a module file!");
 
@@ -91,7 +103,7 @@ public class NinjaModule
         try {
             root = XMLUtil.read(moduleFile);
         }
-        catch (ParserConfigurationException | SAXException e) {
+        catch (SAXException e) {
             throw new IOException(e);
         }
 

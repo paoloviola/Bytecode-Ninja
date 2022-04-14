@@ -54,6 +54,11 @@ public class NinjaDisplay extends JFrame
         selectProject(null);
     }
 
+    /**
+     * Tells the Graphical user interface to select this project.
+     * This will enable or disable all necessary items
+     * @param project the project to load or null to unload the current project
+     */
     public void selectProject(NinjaProject project) {
         currentProject = project;
         menubar.selectProject(project);
@@ -88,6 +93,10 @@ public class NinjaDisplay extends JFrame
         if(!b) dispose();
     }
 
+    /**
+     * Updates the Look and Feel of this Window based on the given settings
+     * TODO: ADD SETTING
+     */
     public static void updateLookAndFeel() {
         if(FlatDarculaLaf.setup())
             FlatDarculaLaf.installLafInfo();

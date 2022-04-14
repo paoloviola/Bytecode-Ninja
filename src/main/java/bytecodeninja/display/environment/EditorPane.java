@@ -13,6 +13,6 @@ public class EditorPane extends JPanel
         add(new JLabel("Editor", JLabel.CENTER), BorderLayout.CENTER);
     }
 
-    public void selectProject(NinjaProject project) { }
+    void selectProject(NinjaProject project) { }
 
 }

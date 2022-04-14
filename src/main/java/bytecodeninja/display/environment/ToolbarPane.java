@@ -38,7 +38,7 @@ public class ToolbarPane extends JToolBar
         add(debugBtn = createButton("icons/startDebugger.svg", "Debug", parent::debugConfig));
     }
 
-    public void selectProject(NinjaProject project) {
+    void selectProject(NinjaProject project) {
         configCombo.removeAllItems();
         if(project != null) {
             project.getModules().forEach(
@@ -51,7 +51,7 @@ public class ToolbarPane extends JToolBar
         selectConfig((RunConfig) configCombo.getSelectedItem());
     }
 
-    public void selectConfig(RunConfig config) {
+    void selectConfig(RunConfig config) {
         runBtn.setEnabled(config != null);
         debugBtn.setEnabled(config != null);
 

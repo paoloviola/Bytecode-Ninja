@@ -83,7 +83,7 @@ public class NinjaMenubar extends JMenuBar
         // Run menu
     }
 
-    public void selectProject(NinjaProject project) {
+    void selectProject(NinjaProject project) {
         // Buttons which should only be accessible if a project is loaded
         newModuleItem.setEnabled(project != null);
         closeProjectItem.setEnabled(project != null);
@@ -91,7 +91,7 @@ public class NinjaMenubar extends JMenuBar
         buildItem.setEnabled(project != null);
     }
 
-    public void selectConfig(RunConfig config) {
+    void selectConfig(RunConfig config) {
         // Buttons which should only be accessible if a config is selected
         runItem.setEnabled(config != null);
         debugItem.setEnabled(config != null);

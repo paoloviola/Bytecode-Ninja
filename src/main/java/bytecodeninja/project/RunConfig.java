@@ -54,6 +54,10 @@ public class RunConfig
         );
     }
 
+    /**
+     * Stores this object into the given element
+     * @param root the element to store this object
+     */
     void save(Element root) {
         Document doc = root.getOwnerDocument();
         Element configElement = doc.createElement("config");
@@ -66,6 +70,12 @@ public class RunConfig
         root.appendChild(configElement);
     }
 
+    /**
+     * Loads a RunConfig struct based on the given Node element
+     * @param configNode the Node element to load
+     * @return a fully parsed RunConfig
+     * @throws IOException if the Node could not be parsed to a RunConfig object
+     */
     static RunConfig load(Node configNode) throws IOException {
         if(!(configNode instanceof Element))
             throw new IOException("Corrupted config element!");
