@@ -5,6 +5,7 @@ import lombok.Getter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -111,21 +112,28 @@ public class NinjaProject
             Document doc = root.getOwnerDocument();
 
             root.appendChild(XMLUtil.createTextNode(doc, "name", name));
+            Element modulesElement = doc.createElement("modules");
+
+            // Go through every module and try to save it
+            // If any of them fails, continue saving but return false
+            boolean containsErrors = false;
+            for(NinjaModule module : modules) {
+                modulesElement.appendChild(XMLUtil.createTextNode(
+                        doc, "module", module.getName()
+                ));
+
+                if(!module.save())
+                    containsErrors = true;
+            }
+
+            root.appendChild(modulesElement);
             XMLUtil.write(doc, new File(location, WORKSPACE_FILE));
+            return !containsErrors;
         }
         catch (Exception e) {
             e.printStackTrace();
             return false;
         }
-
-        // Go through every module and try to save it
-        // If any of them fails, continue saving but return false
-        boolean containsErrors = false;
-        for(NinjaModule module : modules) {
-            if(!module.save())
-                containsErrors = true;
-        }
-        return !containsErrors;
     }
 
     /**
@@ -151,7 +159,9 @@ public class NinjaProject
         }
 
         Node nameNode = XMLUtil.getFirstByTag(root, "name");
-        if(nameNode == null) throw new IOException("Corrupted workspace file!");
+        Node modulesNode = XMLUtil.getFirstByTag(root, "modules");
+        if(nameNode == null || modulesNode == null)
+            throw new IOException("Corrupted workspace file!");
 
         NinjaProject project = new NinjaProject();
         project.location = projectDir.getAbsolutePath();
@@ -159,15 +169,12 @@ public class NinjaProject
         { // Load modules
             File modulesDir = new File(project.getLocation(), MODULES_DIRECTORY);
 
-            File[] moduleFiles = modulesDir.listFiles();
-            if(moduleFiles == null)
-                return project; // Don't load modules if not accessible
-
-            for(File moduleFile : moduleFiles) {
+            NodeList moduleNodes = ((Element)modulesNode).getElementsByTagName("module");
+            for(int i = 0; i < moduleNodes.getLength(); i++) {
                 try {
-                    project.modules.add(
-                            NinjaModule.load(project, moduleFile)
-                    );
+                    project.modules.add(NinjaModule.load(project, new File(
+                            modulesDir, moduleNodes.item(i).getTextContent() + ".xml"
+                    )));
                 }
                 catch (IOException e) {
                     e.printStackTrace();
