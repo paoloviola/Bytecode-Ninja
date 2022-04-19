@@ -6,6 +6,7 @@ import lombok.Getter;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 
@@ -22,8 +23,8 @@ public class NewProjectDialog extends JDialog
 
     @Getter private NinjaProject project;
 
-    public NewProjectDialog(JFrame parent) {
-        super(parent, "New Project", true);
+    public NewProjectDialog(Window parent) {
+        super(parent, "New Project", DEFAULT_MODALITY_TYPE);
         setContentPane(contentPane);
         getRootPane().setDefaultButton(createButton);
 

@@ -15,7 +15,7 @@ public class ProjectSerializationTesting
     public static void main(String[] args) {
         { // Saving
             NinjaProject project = new NinjaProject("Test Project", "C:/Ninja Project");
-            NinjaModule module = new NinjaModule(project, "Test Module");
+            NinjaModule module = new NinjaModule("Test Module");
             module.getRunConfigs().add(new RunConfig("Test Config0"));
             module.getRunConfigs().add(new RunConfig("Test Config1"));
             module.getRunConfigs().add(new RunConfig("Test Config2"));

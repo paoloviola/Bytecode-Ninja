@@ -2,18 +2,19 @@ package bytecodeninja.project;
 
 import bytecodeninja.util.XMLUtil;
 import lombok.Getter;
+import lombok.Setter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 @Getter
 public class NinjaProject
@@ -22,8 +23,11 @@ public class NinjaProject
     protected static final String MODULES_DIRECTORY = ".ninja/modules/";
     protected static final String WORKSPACE_FILE = ".ninja/workspace.xml";
 
-    private String name;
+    @Setter private String name;
+
     private String location;
+
+    // TODO: ADD SDK DIRECTORY
 
     private final List<NinjaModule> modules;
     public NinjaProject(String name, String location) {
@@ -45,7 +49,7 @@ public class NinjaProject
         if(findModule(module.getName()) != null)
             return false;
 
-        if(module.save()) {
+        if(module.save(this)) {
             modules.add(module);
             save(); // Save project silently, since we want to ignore the already known errors
             return true;
@@ -74,12 +78,10 @@ public class NinjaProject
      * @return the found module object or null if not found
      */
     public NinjaModule findModule(String name) {
-        for (NinjaModule module : modules) {
-            if(module.getName().equals(name))
-                return module;
+        try(Stream<NinjaModule> stream = modules.stream()) {
+            return stream.filter(m -> m.getName().equals(name))
+                    .findAny().orElse(null);
         }
-
-        return null;
     }
 
     @Override
@@ -122,7 +124,7 @@ public class NinjaProject
                         doc, "module", module.getName()
                 ));
 
-                if(!module.save())
+                if(!module.save(this))
                     containsErrors = true;
             }
 
@@ -172,7 +174,7 @@ public class NinjaProject
             NodeList moduleNodes = ((Element)modulesNode).getElementsByTagName("module");
             for(int i = 0; i < moduleNodes.getLength(); i++) {
                 try {
-                    project.modules.add(NinjaModule.load(project, new File(
+                    project.modules.add(NinjaModule.load(new File(
                             modulesDir, moduleNodes.item(i).getTextContent() + ".xml"
                     )));
                 }

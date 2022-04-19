@@ -6,7 +6,11 @@ import com.formdev.flatlaf.FlatClientProperties;
 import lombok.Getter;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
 
 public class NewModuleDialog extends JDialog
 {
@@ -16,19 +20,28 @@ public class NewModuleDialog extends JDialog
     private JButton cancelButton;
 
     private JTextField nameField;
+    private JLabel importLabel;
 
     @Getter private NinjaModule module;
 
     private final NinjaProject project;
-    public NewModuleDialog(JFrame parent, NinjaProject project) {
-        super(parent, "New Module", true);
+    public NewModuleDialog(Window parent, NinjaProject project) {
+        super(parent, "New Module", DEFAULT_MODALITY_TYPE);
         setContentPane(contentPane);
         getRootPane().setDefaultButton(createButton);
         this.project = project;
 
         nameField.setText("Unnamed");
+        importLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
         createButton.addActionListener(this::createModule);
         cancelButton.addActionListener(this::cancelModule);
+        importLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                importModule();
+            }
+        });
 
         pack();
         setMinimumSize(getSize());
@@ -42,10 +55,33 @@ public class NewModuleDialog extends JDialog
         if(!b) dispose();
     }
 
+    private void importModule() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Select Module File...");
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setMultiSelectionEnabled(false);
+
+        if(fileChooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION)
+            return;
+
+        try {
+            NinjaModule module = NinjaModule.load(fileChooser.getSelectedFile());
+            if(handleModuleExistence(module.getName())) return;
+            this.module = module;
+            setVisible(false);
+        }
+        catch (IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Could not load module!\nRead the console for more information.", "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
     private void createModule(ActionEvent e) {
         if(handleIncompleteInput()) return;
         if(handleInvalidInput()) return;
-        module = new NinjaModule(project, nameField.getText().trim());
+        module = new NinjaModule(nameField.getText().trim());
         setVisible(false);
     }
 
@@ -54,17 +90,23 @@ public class NewModuleDialog extends JDialog
         setVisible(false);
     }
 
-    private boolean handleInvalidInput() {
-        if(project.findModule(nameField.getText().trim()) == null)
+    private boolean handleModuleExistence(String name) {
+        if(project.findModule(name) == null)
             return false;
-
-        nameField.putClientProperty(
-                FlatClientProperties.OUTLINE, FlatClientProperties.OUTLINE_ERROR
-        );
 
         JOptionPane.showMessageDialog(this,
                 "Module already exists!", "Could not create Module",
                 JOptionPane.INFORMATION_MESSAGE
+        );
+        return true;
+    }
+
+    private boolean handleInvalidInput() {
+        if(!handleModuleExistence(nameField.getText().trim()))
+            return false;
+
+        nameField.putClientProperty(
+                FlatClientProperties.OUTLINE, FlatClientProperties.OUTLINE_ERROR
         );
         return true;
     }

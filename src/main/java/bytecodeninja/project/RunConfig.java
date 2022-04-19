@@ -15,8 +15,6 @@ public class RunConfig
 {
 
     private String name;
-
-    private String sdkDirectory;
     private String workDirectory;
 
     private String vmArguments;
@@ -38,7 +36,6 @@ public class RunConfig
         if (o == null || getClass() != o.getClass()) return false;
         RunConfig runConfig = (RunConfig) o;
         return Objects.equals(name, runConfig.name)
-                && Objects.equals(sdkDirectory, runConfig.sdkDirectory)
                 && Objects.equals(workDirectory, runConfig.workDirectory)
                 && Objects.equals(vmArguments, runConfig.vmArguments)
                 && Objects.equals(programArguments, runConfig.programArguments)
@@ -48,8 +45,7 @@ public class RunConfig
     @Override
     public int hashCode() {
         return Objects.hash(
-                name,
-                sdkDirectory, workDirectory,
+                name, workDirectory,
                 vmArguments, programArguments, mainClass
         );
     }
@@ -62,7 +58,6 @@ public class RunConfig
         Document doc = root.getOwnerDocument();
         Element configElement = doc.createElement("config");
         configElement.appendChild(XMLUtil.createTextNode(doc, "name", name));
-        configElement.appendChild(XMLUtil.createTextNode(doc, "sdkdir", sdkDirectory));
         configElement.appendChild(XMLUtil.createTextNode(doc, "workdir", workDirectory));
         configElement.appendChild(XMLUtil.createTextNode(doc, "vmargs", vmArguments));
         configElement.appendChild(XMLUtil.createTextNode(doc, "programargs", programArguments));
@@ -81,20 +76,17 @@ public class RunConfig
             throw new IOException("Corrupted config element!");
 
         Node nameNode = XMLUtil.getFirstByTag((Element) configNode, "name");
-        Node sdkDirNode = XMLUtil.getFirstByTag((Element) configNode, "sdkdir");
         Node workDirNode = XMLUtil.getFirstByTag((Element) configNode, "workdir");
         Node vmArgsNode = XMLUtil.getFirstByTag((Element) configNode, "vmargs");
         Node programArgsNode = XMLUtil.getFirstByTag((Element) configNode, "programargs");
         Node mainClassNode = XMLUtil.getFirstByTag((Element) configNode, "mainclass");
 
-        if(nameNode == null
-                || sdkDirNode == null || workDirNode == null
+        if(nameNode == null || workDirNode == null
                 || vmArgsNode == null || programArgsNode == null || mainClassNode == null) {
             throw new IOException("Corrupted config element!");
         }
 
         RunConfig runConfig = new RunConfig(nameNode.getTextContent());
-        runConfig.setSdkDirectory(sdkDirNode.getTextContent());
         runConfig.setWorkDirectory(workDirNode.getTextContent());
         runConfig.setVmArguments(vmArgsNode.getTextContent());
         runConfig.setProgramArguments(programArgsNode.getTextContent());

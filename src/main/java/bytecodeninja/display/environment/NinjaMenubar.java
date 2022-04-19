@@ -176,7 +176,7 @@ public class NinjaMenubar extends JMenuBar
     }
 
     public void openProjectStructure(ActionEvent e) {
-        // TODO: OPEN PROJECT STRUCTURE VIEW
+        // TODO: OPEN PROJECT STRUCTURE
     }
 
     public void exit(ActionEvent e) {

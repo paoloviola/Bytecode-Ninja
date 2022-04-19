@@ -2,16 +2,17 @@ package bytecodeninja.project;
 
 import bytecodeninja.util.XMLUtil;
 import lombok.Getter;
+import lombok.Setter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Stream;
 
 @Getter
 public class NinjaModule
@@ -20,23 +21,66 @@ public class NinjaModule
     protected static final String SOURCE_DIRECTORY = "src";
     protected static final String RESOURCE_DIRECTORY = "res";
 
-    private NinjaProject project;
-
-    private String name;
+    @Setter private String name;
 
     private final Set<String> libraries;
-    private final List<RunConfig> runConfigs;
-    public NinjaModule(NinjaProject project, String name) {
-        this.project = Objects.requireNonNull(project);
+    private final Set<RunConfig> runConfigs;
+    public NinjaModule(String name) {
         this.name = Objects.requireNonNull(name);
 
         this.libraries = new HashSet<>();
-        this.runConfigs = new ArrayList<>();
+        this.runConfigs = new HashSet<>();
     }
 
-    private NinjaModule() {
-        this.libraries = new HashSet<>();
-        this.runConfigs = new ArrayList<>();
+    /**
+     * Adds a specific library to this module instance
+     * @param library the library to add
+     * @return if the library was successfully added or not
+     */
+    public boolean addLibrary(String library) {
+        return libraries.add(library);
+    }
+
+    /**
+     * Removes the specific library from this module instance
+     * @param library the identical library in the stored in this module
+     * @return if the library was successfully removed or not
+     */
+    public boolean removeLibrary(String library) {
+        return libraries.remove(library);
+    }
+
+    /**
+     * Adds a specific config to this module instance and saves it
+     * @param config the config to add
+     * @return if the config was successfully added or not
+     */
+    public boolean addConfig(RunConfig config) {
+        if(findConfig(config.getName()) != null)
+            return false;
+
+        return runConfigs.add(config);
+    }
+
+    /**
+     * Removes the specific config instance
+     * @param config the identical config in the stored in this module
+     * @return if the config was successfully removed or not
+     */
+    public boolean removeConfig(RunConfig config) {
+        return runConfigs.remove(config);
+    }
+
+    /**
+     * Searches for a config instance with the given name
+     * @param name the name to search in the config list
+     * @return the found config object or null if not found
+     */
+    public RunConfig findConfig(String name) {
+        try(Stream<RunConfig> stream = runConfigs.stream()) {
+            return stream.filter(c -> c.getName().equals(name))
+                    .findAny().orElse(null);
+        }
     }
 
     @Override
@@ -63,7 +107,7 @@ public class NinjaModule
      * Saves this module to the predefined Path "${PROJECT_LOCATION}/.ninja/modules/${MODULE_NAME}.xml"
      * @return if the module has been saved successfully or not
      */
-    boolean save() {
+    public boolean save(NinjaProject project) {
         Element root = XMLUtil.createDefault("module");
         Document doc = root.getOwnerDocument();
         {
@@ -79,7 +123,10 @@ public class NinjaModule
         }
 
         try {
-            XMLUtil.write(doc, new File(project.getLocation(), NinjaProject.MODULES_DIRECTORY + name + ".xml"));
+            XMLUtil.write(doc, new File(
+                    project.getLocation(),
+                    NinjaProject.MODULES_DIRECTORY + name + ".xml"
+            ));
             return true;
         }
         catch (Exception e) {
@@ -90,12 +137,11 @@ public class NinjaModule
 
     /**
      * Loads the module file and stores it into a NinjaModule struct
-     * @param project the project this module belongs to (used for saving purposes)
      * @param moduleFile the file to load from
      * @return the created NinjaModule object
      * @throws IOException if any IO errors occur
      */
-    static NinjaModule load(NinjaProject project, File moduleFile) throws IOException {
+    public static NinjaModule load(File moduleFile) throws IOException {
         if(!moduleFile.exists() || !moduleFile.isFile())
             throw new IOException("Not a module file!");
 
@@ -117,10 +163,7 @@ public class NinjaModule
             throw new IOException("Corrupted module file!");
         }
 
-        NinjaModule module = new NinjaModule();
-        module.project = project;
-
-        module.name = nameNode.getTextContent();
+        NinjaModule module = new NinjaModule(nameNode.getTextContent());
         { // Load run configurations
             NodeList configNodes = ((Element)configsNode).getElementsByTagName("config");
             for (int i = 0; i < configNodes.getLength(); i++) {
