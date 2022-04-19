@@ -5,6 +5,7 @@ import bytecodeninja.project.NinjaProject;
 import bytecodeninja.project.RunConfig;
 import bytecodeninja.util.SwingUtil;
 import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -12,6 +13,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -61,9 +63,32 @@ public class ProjectStructureDialog extends JDialog
         getRootPane().setDefaultButton(okButton);
         this.project = project;
 
-        modules_moduleList.setModel(modules_moduleListModel = new DefaultListModel<>());
-        modules_libraryList.setModel(modules_libraryListModel = new DefaultListModel<>());
-        configs_configList.setModel(configs_configListModel = new DefaultListModel<>());
+        { // Decorate dialog
+            final FlatSVGIcon addIcon = new FlatSVGIcon("icons/add.svg");
+            final FlatSVGIcon removeIcon = new FlatSVGIcon("icons/remove.svg");
+            final FlatSVGIcon moduleIcon = new FlatSVGIcon("icons/moduleDirectory.svg");
+
+            // Add and remove buttons
+            modules_addModuleButton.setIcon(addIcon);
+            modules_removeModuleButton.setIcon(removeIcon);
+            modules_addLibraryButton.setIcon(addIcon);
+            modules_removeLibraryButton.setIcon(removeIcon);
+            configs_addConfigButton.setIcon(addIcon);
+            configs_removeConfigButton.setIcon(removeIcon);
+
+            // Lists and Combos
+            modules_moduleList.setCellRenderer(new IconCellRenderer(moduleIcon));
+            modules_libraryList.setCellRenderer(new IconCellRenderer(new FlatSVGIcon("icons/archive.svg")));
+            configs_configList.setCellRenderer(new IconCellRenderer(new FlatSVGIcon("icons/application.svg")));
+            configs_moduleCombo.setRenderer(new IconCellRenderer(moduleIcon));
+            modules_moduleList.setModel(modules_moduleListModel = new DefaultListModel<>());
+            modules_libraryList.setModel(modules_libraryListModel = new DefaultListModel<>());
+            configs_configList.setModel(configs_configListModel = new DefaultListModel<>());
+        }
+
+        contentPane.registerKeyboardAction(e -> setVisible(false),
+                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         modules_moduleList.addListSelectionListener(this::selectModule);
         modules_libraryList.addListSelectionListener(this::selectLibrary);
@@ -465,6 +490,20 @@ public class ProjectStructureDialog extends JDialog
         try(Stream<NinjaModule> stream = project.getModules().stream()) {
             return stream.filter(m -> m.getRunConfigs().contains(config))
                     .findAny().orElse(null);
+        }
+    }
+
+    private static class IconCellRenderer extends DefaultListCellRenderer {
+        private final Icon icon;
+        public IconCellRenderer(Icon icon) {
+            this.icon = icon;
+        }
+
+        @Override
+        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            setIcon(icon);
+            return this;
         }
     }
 

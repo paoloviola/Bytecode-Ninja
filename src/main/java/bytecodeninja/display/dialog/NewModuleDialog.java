@@ -8,6 +8,7 @@ import lombok.Getter;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -37,8 +38,11 @@ public class NewModuleDialog extends JDialog
             name.append("Unnamed (").append(i).append(')');
         }
         nameField.setText(name.toString());
-
         importLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        contentPane.registerKeyboardAction(this::cancelModule,
+                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         createButton.addActionListener(this::createModule);
         cancelButton.addActionListener(this::cancelModule);

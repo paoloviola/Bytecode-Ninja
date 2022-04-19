@@ -8,6 +8,7 @@ import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.io.File;
 
 public class NewProjectDialog extends JDialog
@@ -33,6 +34,10 @@ public class NewProjectDialog extends JDialog
                 FileSystemView.getFileSystemView().getDefaultDirectory(),
                 "Ninja Projects/" + nameField.getText()
         ).getAbsolutePath());
+
+        contentPane.registerKeyboardAction(this::cancelProject,
+                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         locationButton.addActionListener(this::selectLocation);
         createButton.addActionListener(this::createProject);
