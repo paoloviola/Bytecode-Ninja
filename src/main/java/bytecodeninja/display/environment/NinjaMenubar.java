@@ -2,6 +2,7 @@ package bytecodeninja.display.environment;
 
 import bytecodeninja.display.dialog.NewModuleDialog;
 import bytecodeninja.display.dialog.NewProjectDialog;
+import bytecodeninja.display.dialog.ProjectStructureDialog;
 import bytecodeninja.project.NinjaProject;
 import bytecodeninja.project.ProjectException;
 import bytecodeninja.project.RunConfig;
@@ -176,7 +177,9 @@ public class NinjaMenubar extends JMenuBar
     }
 
     public void openProjectStructure(ActionEvent e) {
-        // TODO: OPEN PROJECT STRUCTURE
+        NinjaProject project = parent.getCurrentProject();
+        if(project == null) throw new RuntimeException("This is not supposed to happen!");
+        new ProjectStructureDialog(parent, project).setVisible(true);
     }
 
     public void exit(ActionEvent e) {
