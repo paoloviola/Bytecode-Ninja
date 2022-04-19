@@ -47,7 +47,7 @@ public class ToolbarPane extends JToolBar
         }
 
         buildBtn.setEnabled(project != null);
-        configCombo.setEnabled(project != null);
+        configCombo.setEnabled(project != null && configCombo.getItemCount() > 0);
         selectConfig((RunConfig) configCombo.getSelectedItem());
     }
 

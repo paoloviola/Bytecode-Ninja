@@ -180,6 +180,7 @@ public class NinjaMenubar extends JMenuBar
         NinjaProject project = parent.getCurrentProject();
         if(project == null) throw new RuntimeException("This is not supposed to happen!");
         new ProjectStructureDialog(parent, project).setVisible(true);
+        parent.selectProject(project); // Update project view
     }
 
     public void exit(ActionEvent e) {
