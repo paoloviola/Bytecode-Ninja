@@ -4,12 +4,14 @@ import bytecodeninja.project.NinjaModule;
 import bytecodeninja.project.NinjaProject;
 import bytecodeninja.project.RunConfig;
 import bytecodeninja.util.SwingUtil;
+import com.formdev.flatlaf.FlatClientProperties;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ItemEvent;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -82,14 +84,16 @@ public class ProjectStructureDialog extends JDialog
         if(!b) dispose();
     }
 
-    // Modules tab
+    // Modules tab (changes)
     private void addModule(ActionEvent e) {
         NewModuleDialog dialog = new NewModuleDialog(this, project);
         dialog.setVisible(true);
 
         if(dialog.getModule() == null) return;
-        if(project.addModule(dialog.getModule()))
+        if(project.addModule(dialog.getModule())) {
             modules_moduleListModel.addElement(dialog.getModule());
+            configs_moduleCombo.addItem(dialog.getModule());
+        }
         else {
             JOptionPane.showMessageDialog(this,
                     "Could not create Module!\nRead the console for further information.", "Error",
@@ -103,8 +107,10 @@ public class ProjectStructureDialog extends JDialog
         if(selectedIndex == -1) throw new RuntimeException("This is not supposed to happen!");
 
         NinjaModule selectedModule = modules_moduleListModel.getElementAt(selectedIndex);
-        if(project.removeModule(selectedModule))
+        if(project.removeModule(selectedModule)) {
             modules_moduleListModel.removeElementAt(selectedIndex);
+            configs_moduleCombo.removeItem(selectedModule);
+        }
         else
             throw new RuntimeException("This is not supposed to happen!");
     }
@@ -163,7 +169,7 @@ public class ProjectStructureDialog extends JDialog
         catch (IOException e0) {
             e0.printStackTrace();
             JOptionPane.showMessageDialog(this,
-                    "Could not import Libraries!\nRead the console for more information.", "Error",
+                    "Could not import Libraries!\nRead the console for futher information.", "Error",
                     JOptionPane.ERROR_MESSAGE
             );
         }
@@ -187,13 +193,28 @@ public class ProjectStructureDialog extends JDialog
             }
         }
     }
-    // Modules tab
+    // Modules tab (changes)
 
-    // Configs tab
-    private void addConfig(ActionEvent e) { // TODO:
+    // Configs tab (changes)
+    private void addConfig(ActionEvent e) {
+        RunConfig config = new RunConfig("Unnamed");
+        configs_configListModel.addElement(config);
     }
 
-    private void removeConfig(ActionEvent e) { // TODO:
+    private void removeConfig(ActionEvent e) {
+        int selectedIndex = configs_configList.getSelectedIndex();
+        if(selectedIndex == -1) throw new RuntimeException("This is not supposed to happen!");
+        RunConfig selectedConfig = configs_configListModel.getElementAt(selectedIndex);
+
+        NinjaModule correspondingModule = findModuleOf(selectedConfig);
+        if(correspondingModule == null || correspondingModule.removeConfig(project, selectedConfig))
+            configs_configListModel.removeElementAt(selectedIndex);
+        else {
+            JOptionPane.showMessageDialog(this,
+                    "Could not remove Config!\nRead the console for further information.", "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
     }
 
     private void setConfigName() {
@@ -205,7 +226,14 @@ public class ProjectStructureDialog extends JDialog
         }
     }
 
-    private void setConfigModule(ItemEvent e) { // TODO:
+    private void setConfigModule(ActionEvent e) {
+        RunConfig selectedConfig = configs_configList.getSelectedValue();
+        if(selectedConfig == null) return;
+
+        NinjaModule oldModule = findModuleOf(selectedConfig);
+        if(oldModule != null) oldModule.removeConfig(project, selectedConfig);
+        NinjaModule newModule = (NinjaModule) configs_moduleCombo.getSelectedItem();
+        if(newModule != null) newModule.addConfig(project, selectedConfig);
     }
 
     private void setConfigMainClass() {
@@ -226,6 +254,7 @@ public class ProjectStructureDialog extends JDialog
         if(fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
             selectedConfig.setWorkDirectory(selectedFile.getAbsolutePath());
+            configs_workDirField.setText(selectedConfig.getWorkDirectory());
         }
     }
 
@@ -240,8 +269,92 @@ public class ProjectStructureDialog extends JDialog
         if(selectedConfig != null)
             selectedConfig.setVmArguments(configs_vmArgsField.getText().trim());
     }
-    // Configs tab
+    // Configs tab (changes)
 
+    // Apply region
+    private void applyModuleName(FocusEvent e) {
+        NinjaModule selectedModule = modules_moduleList.getSelectedValue();
+        if(selectedModule == null) throw new RuntimeException("This is not supposed to happen!");
+
+        // Check if module name is empty
+        if(selectedModule.getName().isEmpty()) {
+            // Set outline error
+            modules_nameField.putClientProperty(FlatClientProperties.OUTLINE, FlatClientProperties.OUTLINE_ERROR);
+            modules_nameField.requestFocusInWindow();
+            return;
+        }
+
+        // Check if module exists twice
+        if(findModuleExcept(selectedModule, selectedModule.getName()) == null) {
+            modules_nameField.putClientProperty(FlatClientProperties.OUTLINE, null); // Clear outline
+            if(!project.save()) { // When saving failed
+                modules_nameField.requestFocusInWindow();
+                JOptionPane.showMessageDialog(this,
+                        "Could not apply changes!\nRead the console for further information.", "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
+        }
+        else {
+            JOptionPane.showMessageDialog(this,
+                    "Module name already exists!", "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+            // Set outline error
+            modules_nameField.putClientProperty(FlatClientProperties.OUTLINE, FlatClientProperties.OUTLINE_ERROR);
+            modules_nameField.requestFocusInWindow();
+        }
+    }
+
+    private void applyConfigName(FocusEvent focusEvent) {
+        RunConfig selectedConfig = configs_configList.getSelectedValue();
+        if(selectedConfig == null) throw new RuntimeException("This is not supposed to happen!");
+
+        // Check if config name is empty
+        if(selectedConfig.getName().isEmpty()) {
+            // Set outline error
+            modules_nameField.putClientProperty(FlatClientProperties.OUTLINE, FlatClientProperties.OUTLINE_ERROR);
+            modules_nameField.requestFocusInWindow();
+            return;
+        }
+
+        // Check if config exists twice
+        if(findConfigExcept(selectedConfig, selectedConfig.getName()) == null) {
+            configs_nameField.putClientProperty(FlatClientProperties.OUTLINE, null); // Clear outline
+
+            NinjaModule selectedModule = findModuleOf(selectedConfig);
+            if(selectedModule != null && !selectedModule.save(project)) {
+                configs_nameField.requestFocusInWindow();
+                JOptionPane.showMessageDialog(this,
+                        "Could not apply changes!\nRead the console for further information.", "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
+        }
+        else {
+            JOptionPane.showMessageDialog(this,
+                    "Config name already exists!", "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+            // Set outline error
+            configs_nameField.putClientProperty(FlatClientProperties.OUTLINE, FlatClientProperties.OUTLINE_ERROR);
+            configs_nameField.requestFocusInWindow();
+        }
+    }
+
+    private void applyAllSettings(FocusEvent focusEvent) {
+        if(!project.save()) {
+            JOptionPane.showMessageDialog(this,
+                    "Could not apply Settings!\nRead the console for further information.", "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+    // Apply region
+
+    // Select region
     private void selectModule(ListSelectionEvent e) {
         NinjaModule selectedModule = modules_moduleList.getSelectedValue();
         modules_removeModuleButton.setEnabled(selectedModule != null);
@@ -277,11 +390,13 @@ public class ProjectStructureDialog extends JDialog
         configs_vmArgsField.setEnabled(selectedConfig != null);
 
         configs_nameField.setText(selectedConfig == null ? "" : selectedConfig.getName());
+        configs_moduleCombo.setSelectedItem(selectedConfig == null ? null : findModuleOf(selectedConfig));
         configs_mainClassField.setText(selectedConfig == null ? "" : selectedConfig.getMainClass());
         configs_workDirField.setText(selectedConfig == null ? "" : selectedConfig.getWorkDirectory());
         configs_programArgsField.setText(selectedConfig == null ? "" : selectedConfig.getProgramArguments());
         configs_vmArgsField.setText(selectedConfig == null ? "" : selectedConfig.getVmArguments());
     }
+    // Select region
 
     private void addModuleListeners() {
         modules_addModuleButton.addActionListener(this::addModule);
@@ -289,17 +404,24 @@ public class ProjectStructureDialog extends JDialog
         SwingUtil.addDocumentListener(modules_nameField, this::setModuleName);
         modules_addLibraryButton.addActionListener(this::addLibrary);
         modules_removeLibraryButton.addActionListener(this::removeLibrary);
+
+        modules_nameField.addFocusListener((FocusListenerAdapter) this::applyModuleName);
     }
 
     private void addConfigListeners() {
         configs_addConfigButton.addActionListener(this::addConfig);
         configs_removeConfigButton.addActionListener(this::removeConfig);
         SwingUtil.addDocumentListener(configs_nameField, this::setConfigName);
-        configs_moduleCombo.addItemListener(this::setConfigModule);
+        configs_moduleCombo.addActionListener(this::setConfigModule);
         SwingUtil.addDocumentListener(configs_mainClassField, this::setConfigMainClass);
         configs_workDirButton.addActionListener(this::setConfigWorkDir);
         SwingUtil.addDocumentListener(configs_programArgsField, this::setConfigProgramArgs);
         SwingUtil.addDocumentListener(configs_vmArgsField, this::setConfigVMArgs);
+
+        configs_nameField.addFocusListener((FocusListenerAdapter) this::applyConfigName);
+        configs_mainClassField.addFocusListener((FocusListenerAdapter) this::applyAllSettings);
+        configs_programArgsField.addFocusListener((FocusListenerAdapter) this::applyAllSettings);
+        configs_vmArgsField.addFocusListener((FocusListenerAdapter) this::applyAllSettings);
     }
 
     private void fillContents() {
@@ -310,12 +432,45 @@ public class ProjectStructureDialog extends JDialog
         configs_configListModel.removeAllElements();
         for(NinjaModule module : project.getModules()) {
             modules_moduleListModel.addElement(module);
+            configs_moduleCombo.addItem(module);
+
             for(RunConfig config : module.getRunConfigs())
                 configs_configListModel.addElement(config);
         }
 
         selectModule(null); // Update current state
         selectConfig(null); // Update current state
+    }
+
+    private NinjaModule findModuleExcept(NinjaModule exception, String name) {
+        try(Stream<NinjaModule> stream = project.getModules().stream()) {
+            return stream.filter(m -> m.getName().equals(name))
+                    .filter(m -> !m.equals(exception))
+                    .findAny().orElse(null);
+        }
+    }
+
+    private RunConfig findConfigExcept(RunConfig exception, String name) {
+        for(NinjaModule module : project.getModules()) {
+            for(RunConfig config : module.getRunConfigs()) {
+                if(!config.equals(exception) && config.getName().equals(name))
+                    return config;
+            }
+        }
+
+        return null;
+    }
+
+    private NinjaModule findModuleOf(RunConfig config) {
+        try(Stream<NinjaModule> stream = project.getModules().stream()) {
+            return stream.filter(m -> m.getRunConfigs().contains(config))
+                    .findAny().orElse(null);
+        }
+    }
+
+    private interface FocusListenerAdapter extends FocusListener {
+        @Override
+        default void focusGained(FocusEvent e) { }
     }
 
 }

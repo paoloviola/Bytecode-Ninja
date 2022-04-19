@@ -31,7 +31,13 @@ public class NewModuleDialog extends JDialog
         getRootPane().setDefaultButton(createButton);
         this.project = project;
 
-        nameField.setText("Unnamed");
+        StringBuilder name = new StringBuilder("Unnamed");
+        for(int i = 0; project.findModule(name.toString()) != null; i++) {
+            name.setLength(0);
+            name.append("Unnamed (").append(i).append(')');
+        }
+        nameField.setText(name.toString());
+
         importLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         createButton.addActionListener(this::createModule);
@@ -72,7 +78,7 @@ public class NewModuleDialog extends JDialog
         }
         catch (IOException ex) {
             JOptionPane.showMessageDialog(this,
-                    "Could not load module!\nRead the console for more information.", "Error",
+                    "Could not load module!\nRead the console for further information.", "Error",
                     JOptionPane.ERROR_MESSAGE
             );
         }

@@ -30,26 +30,6 @@ public class RunConfig
         return name;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        RunConfig runConfig = (RunConfig) o;
-        return Objects.equals(name, runConfig.name)
-                && Objects.equals(workDirectory, runConfig.workDirectory)
-                && Objects.equals(vmArguments, runConfig.vmArguments)
-                && Objects.equals(programArguments, runConfig.programArguments)
-                && Objects.equals(mainClass, runConfig.mainClass);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(
-                name, workDirectory,
-                vmArguments, programArguments, mainClass
-        );
-    }
-
     /**
      * Stores this object into the given element
      * @param root the element to store this object

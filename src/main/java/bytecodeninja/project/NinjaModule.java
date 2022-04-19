@@ -127,21 +127,6 @@ public class NinjaModule
         return name;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        NinjaModule module = (NinjaModule) o;
-        return name.equals(module.name)
-                && runConfigs.equals(module.runConfigs)
-                && libraries.equals(module.libraries);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, runConfigs, libraries);
-    }
-
     /**
      * Saves this module to the predefined Path "${PROJECT_LOCATION}/.ninja/modules/${MODULE_NAME}.xml"
      * @return if the module has been saved successfully or not

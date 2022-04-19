@@ -89,21 +89,6 @@ public class NinjaProject
         return name;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        NinjaProject project = (NinjaProject) o;
-        return name.equals(project.name)
-                && location.equals(project.location)
-                && modules.equals(project.modules);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, location, modules);
-    }
-
     /**
      * Saves the project on the predefined path
      * @return true if the project was saved without any errors, otherwise false
