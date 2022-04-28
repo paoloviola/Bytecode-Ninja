@@ -8,7 +8,7 @@ import java.awt.*;
 public class ConsolePane extends JPanel
 {
 
-    public ConsolePane(NinjaMenubar parent) {
+    public ConsolePane(NinjaMenubar menu) {
         super(new BorderLayout());
         add(new JLabel("Console", JLabel.CENTER), BorderLayout.CENTER);
     }

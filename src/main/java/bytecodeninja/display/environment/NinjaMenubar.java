@@ -1,5 +1,6 @@
 package bytecodeninja.display.environment;
 
+import bytecodeninja.display.StaticIcon;
 import bytecodeninja.display.dialog.NewModuleDialog;
 import bytecodeninja.display.dialog.NewProjectDialog;
 import bytecodeninja.display.dialog.ProjectStructureDialog;
@@ -49,7 +50,7 @@ public class NinjaMenubar extends JMenuBar
         fileMenu.add(closeProjectItem = createMenuItem("Close Project", this::closeProject));
         fileMenu.addSeparator();
         fileMenu.add(projectStructureItem = createMenuItem("Project Structure...",
-                new FlatSVGIcon("icons/projectStructure.svg"),
+                StaticIcon.get("icons/projectStructure.svg"),
                 KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK | InputEvent.ALT_MASK | InputEvent.SHIFT_MASK),
                 this::openProjectStructure
         ));
@@ -61,7 +62,7 @@ public class NinjaMenubar extends JMenuBar
         // Build menu
         JMenu buildMenu = new JMenu("Build");
         buildMenu.add(buildItem = createMenuItem("Build Project",
-                new FlatSVGIcon("icons/compile.svg"),
+                StaticIcon.get("icons/compile.svg"),
                 KeyStroke.getKeyStroke(KeyEvent.VK_F9, InputEvent.CTRL_MASK),
                 this::buildProject
         ));
@@ -71,12 +72,12 @@ public class NinjaMenubar extends JMenuBar
         // Run menu
         JMenu runMenu = new JMenu("Run");
         runMenu.add(runItem = createMenuItem("Run",
-                new FlatSVGIcon("icons/execute.svg"),
+                StaticIcon.get("icons/execute.svg"),
                 KeyStroke.getKeyStroke(KeyEvent.VK_F10, InputEvent.SHIFT_MASK),
                 this::runConfig
         ));
         runMenu.add(debugItem = createMenuItem("Debug",
-                new FlatSVGIcon("icons/startDebugger.svg"),
+                StaticIcon.get("icons/startDebugger.svg"),
                 KeyStroke.getKeyStroke(KeyEvent.VK_F9, InputEvent.SHIFT_MASK),
                 this::debugConfig
         ));

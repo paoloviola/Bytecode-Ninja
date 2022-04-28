@@ -8,7 +8,7 @@ import java.awt.*;
 public class EditorPane extends JPanel
 {
 
-    public EditorPane(NinjaMenubar parent) {
+    public EditorPane(NinjaMenubar menu) {
         super(new BorderLayout());
         add(new JLabel("Editor", JLabel.CENTER), BorderLayout.CENTER);
     }

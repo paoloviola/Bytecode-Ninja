@@ -1,5 +1,6 @@
 package bytecodeninja.display.environment;
 
+import bytecodeninja.display.StaticIcon;
 import bytecodeninja.project.NinjaProject;
 import bytecodeninja.project.RunConfig;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
@@ -16,9 +17,9 @@ public class ToolbarPane extends JToolBar
     private final JButton runBtn;
     private final JButton debugBtn;
 
-    private final NinjaMenubar parent;
-    public ToolbarPane(NinjaMenubar parent) {
-        this.parent = parent;
+    private final NinjaMenubar menu;
+    public ToolbarPane(NinjaMenubar menu) {
+        this.menu = menu;
 
         setLayout(new FlowLayout(FlowLayout.RIGHT, 2, 2));
         setBorder(BorderFactory.createRaisedBevelBorder());
@@ -26,16 +27,16 @@ public class ToolbarPane extends JToolBar
 
         // TODO: MAYBE ADD SOME LAYOUT
         add(Box.createHorizontalGlue());
-        add(buildBtn = createButton("icons/compile.svg", "Build Project", parent::buildProject));
+        add(buildBtn = createButton("icons/compile.svg", "Build Project", menu::buildProject));
 
         configCombo = new JComboBox<>();
         configCombo.setToolTipText("Select Run config");
-        configCombo.setRenderer(new IconComboRenderer(new FlatSVGIcon("icons/application.svg")));
+        configCombo.setRenderer(new IconComboRenderer(StaticIcon.get("icons/application.svg")));
         configCombo.addActionListener(e -> this.selectConfig((RunConfig) configCombo.getSelectedItem()));
         add(configCombo);
 
-        add(runBtn = createButton("icons/execute.svg", "Run", parent::runConfig));
-        add(debugBtn = createButton("icons/startDebugger.svg", "Debug", parent::debugConfig));
+        add(runBtn = createButton("icons/execute.svg", "Run", menu::runConfig));
+        add(debugBtn = createButton("icons/startDebugger.svg", "Debug", menu::debugConfig));
     }
 
     void selectProject(NinjaProject project) {
@@ -58,11 +59,11 @@ public class ToolbarPane extends JToolBar
         String postfix = config == null ? "" : " '" + config + "'";
         runBtn.setToolTipText("Run" + postfix);
         debugBtn.setToolTipText("Debug" + postfix);
-        this.parent.selectConfig(config);
+        this.menu.selectConfig(config);
     }
 
     private static JButton createButton(String icon, String tooltip, ActionListener action) {
-        JButton button = new JButton(new FlatSVGIcon(icon));
+        JButton button = new JButton(StaticIcon.get(icon));
         button.addActionListener(action);
         button.setToolTipText(tooltip);
         return button;

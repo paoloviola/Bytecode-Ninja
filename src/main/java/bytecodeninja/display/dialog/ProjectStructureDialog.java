@@ -1,5 +1,6 @@
 package bytecodeninja.display.dialog;
 
+import bytecodeninja.display.StaticIcon;
 import bytecodeninja.project.NinjaModule;
 import bytecodeninja.project.NinjaProject;
 import bytecodeninja.project.RunConfig;
@@ -64,23 +65,19 @@ public class ProjectStructureDialog extends JDialog
         this.project = project;
 
         { // Decorate dialog
-            final FlatSVGIcon addIcon = new FlatSVGIcon("icons/add.svg");
-            final FlatSVGIcon removeIcon = new FlatSVGIcon("icons/remove.svg");
-            final FlatSVGIcon moduleIcon = new FlatSVGIcon("icons/moduleDirectory.svg");
-
             // Add and remove buttons
-            modules_addModuleButton.setIcon(addIcon);
-            modules_removeModuleButton.setIcon(removeIcon);
-            modules_addLibraryButton.setIcon(addIcon);
-            modules_removeLibraryButton.setIcon(removeIcon);
-            configs_addConfigButton.setIcon(addIcon);
-            configs_removeConfigButton.setIcon(removeIcon);
+            modules_addModuleButton.setIcon(StaticIcon.get("icons/add.svg"));
+            modules_removeModuleButton.setIcon(StaticIcon.get("icons/remove.svg"));
+            modules_addLibraryButton.setIcon(StaticIcon.get("icons/add.svg"));
+            modules_removeLibraryButton.setIcon(StaticIcon.get("icons/remove.svg"));
+            configs_addConfigButton.setIcon(StaticIcon.get("icons/add.svg"));
+            configs_removeConfigButton.setIcon(StaticIcon.get("icons/remove.svg"));
 
             // Lists and Combos
-            modules_moduleList.setCellRenderer(new IconCellRenderer(moduleIcon));
-            modules_libraryList.setCellRenderer(new IconCellRenderer(new FlatSVGIcon("icons/archive.svg")));
-            configs_configList.setCellRenderer(new IconCellRenderer(new FlatSVGIcon("icons/application.svg")));
-            configs_moduleCombo.setRenderer(new IconCellRenderer(moduleIcon));
+            modules_moduleList.setCellRenderer(new IconCellRenderer(StaticIcon.get("icons/moduleDirectory.svg")));
+            modules_libraryList.setCellRenderer(new IconCellRenderer(StaticIcon.get("icons/archive.svg")));
+            configs_configList.setCellRenderer(new IconCellRenderer(StaticIcon.get("icons/application.svg")));
+            configs_moduleCombo.setRenderer(new IconCellRenderer(StaticIcon.get("icons/moduleDirectory.svg")));
             modules_moduleList.setModel(modules_moduleListModel = new DefaultListModel<>());
             modules_libraryList.setModel(modules_libraryListModel = new DefaultListModel<>());
             configs_configList.setModel(configs_configListModel = new DefaultListModel<>());

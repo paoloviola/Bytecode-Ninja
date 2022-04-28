@@ -122,6 +122,15 @@ public class NinjaModule
         }
     }
 
+    /**
+     * Gets this modules root directory "${PROJECT_LOCATION}/${MODULE_NAME}"
+     * @param project the project this module corresponds to
+     * @return this modules root directory
+     */
+    public File getRootDirectory(NinjaProject project) {
+        return new File(project.getLocation(), name);
+    }
+
     @Override
     public String toString() {
         return name;
@@ -129,6 +138,7 @@ public class NinjaModule
 
     /**
      * Saves this module to the predefined Path "${PROJECT_LOCATION}/.ninja/modules/${MODULE_NAME}.xml"
+     * @param project the project this module corresponds to
      * @return if the module has been saved successfully or not
      */
     public boolean save(NinjaProject project) {
